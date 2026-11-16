@@ -116,3 +116,28 @@ export const DELETE = withAuth(
     return NextResponse.json({ success: true });
   }
 );
+
+export const PATCH = withAuth(
+  async (req, session): Promise<Response> => {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    if (!id) {
+      return NextResponse.json({ error: "Missing id" }, { status: 400 });
+    }
+
+    const automation = await prisma.automation.findUnique({ where: { id } });
+
+    if (!automation || automation.userId !== session.user.id) {
+      return NextResponse.json({ error: "Not Found" }, { status: 404 });
+    } 
+
+    const updated = await prisma.automation.update({
+      where: { id },
+      data: { isActive: !automation.isActive },
+    });
+
+    return NextResponse.json(updated);
+
+  }
+);
