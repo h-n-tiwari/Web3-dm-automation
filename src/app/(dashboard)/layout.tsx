@@ -10,7 +10,7 @@ export default function DashboardLayout({
     <div className="flex min-h-screen bg-gray-950 text-white">
       {/* Sidebar */}
       <aside className="flex w-56 shrink-0 flex-col gap-2 border-r border-gray-800 p-6">
-        <p className="mb-6 text-lg font-bold">DM Add</p>
+        <p className="mb-6 text-lg font-bold">Web3-DM</p>
 
         <Link
           href="/dashboard"
