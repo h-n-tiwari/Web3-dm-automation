@@ -39,6 +39,49 @@ export default function AutomationsList({
             { showForm ? "Cancel" : "New Automation" }
         </button>
 
+        {/* Create Form */ }
+        {showForm && (
+            <form className="mb-8 rounded-xl border border-gray-800 bg-gray-900 p-6 flex flex-col gap-4">
+                <h2 className="text-lg font-semibold">New Automation</h2>
+
+                {error && <p className="text-sm text-red-400">{error}</p>}
+
+                <input 
+                    type="text"
+                    placeholder="Name (e.g. Hello)"
+                    required
+                    className="rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-sm outline-none focus:border-indigo-500" 
+                />
+
+                <input 
+                    type="text"
+                    placeholder="Trigger Keyword (e.g. #giveaway)"
+                    required
+                    className="rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-sm outline-none focus:border-indigo-500" 
+                />
+
+                <textarea 
+                    placeholder="DM to send..."
+                    rows={3}
+                    required
+                    className="rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-sm outline-none focus:border-indigo-500" 
+                />
+
+                <button
+                    type="submit"
+                    className="self-start rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium hover:bg-indigo-500 transition disabled:opacity-50"
+                >
+                    {loading ? "Creating..." : "Create Automation"}
+                </button>
+
+
+
+            </form>
+        )}
+
+        
+
+
 
 
 
