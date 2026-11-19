@@ -1,3 +1,4 @@
+import AutomationsList from "@/components/automations-list";
 import { auth } from "@/server/auth";
 import { prisma } from "@/server/prisma";
 import { headers } from "next/headers";
@@ -21,6 +22,7 @@ export default async function AutomationPage() {
     return (
         <div>
             <h1 className="mb-8 text-2xl font-bold">Automations</h1>
+            <AutomationsList initialAutomations={automations} />
         </div>
     )
 }
