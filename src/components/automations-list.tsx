@@ -70,6 +70,31 @@ export default function AutomationsList({
         }
     }
 
+    // TOGGLE - PATCH
+    async function handleToggle(id: string) {
+        setError("");
+
+        try {
+            const { data } = await axios.patch<Automation>(
+                "/api/automations", 
+                null,
+                { 
+                    params: { id },
+                }
+            );
+
+            setAutomations((prev) => 
+                prev.map((a) => (a.id === id ? data : a))
+            )
+
+        } catch (err: unknown) {
+            setError(
+                getErrorMessage(err, "Failed to update automation")
+            );
+        }
+
+    }
+
 
   return (
     <div>
