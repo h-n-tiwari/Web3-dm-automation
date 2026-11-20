@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react";
+import axios from "axios";
 
 type Automation = {
     id: string;
@@ -10,6 +11,14 @@ type Automation = {
     dmMessage: string;
     isActive: boolean;
     createdAt: Date;
+}
+
+// Handling Axios Errors
+function getErrorMessage(error: unknown, fallback: string): string {
+    if (axios.isAxiosError<{error?: string}>(error)) {
+        return error.response?.data?.error || fallback;
+    }
+    return fallback;
 }
 
 export default function AutomationsList({
@@ -73,10 +82,54 @@ export default function AutomationsList({
                 >
                     {loading ? "Creating..." : "Create Automation"}
                 </button>
-
-
-
             </form>
+        )}
+
+        {/* Automations List */}
+        {automations.length === 0 ? (
+            <div className="rounded-xl border border-gray-800 bg-gray-900 p-10 text-center text-gray-400">
+                No automations yet. Create your first one above.
+            </div>
+        ) : (
+            <div className="flex flex-col gap-3">
+                {automations.map((automation) => (
+                    <div key={automation.id} className="">
+                        <div>
+                            <p className="font-medium">{automation.name}</p>
+                            <p className="mt-1 text-sm text-gray-400">
+                                Trigger: <span className="text-gray-300">{automation.trigger}</span>
+                            </p>
+                            <p className="text-sm text-gray-400">
+                                Message: <span className="text-gray-300">{automation.dmMessage}</span>
+                            </p>
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                            {/* Toggle */}
+                            <button 
+                                onClick={}
+                                className="">
+                                Toggle
+                                
+                            </button>
+
+                            {/* Delete */}
+                            <button
+                                onClick={} 
+                                className="">
+                                Delete
+
+                            </button>
+
+
+
+                        </div>
+
+
+
+                    </div>
+                ))}
+            </div>
         )}
 
         
