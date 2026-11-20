@@ -95,6 +95,30 @@ export default function AutomationsList({
 
     }
 
+    // DELETE - DELETE
+    async function handleDelete(id: string) {
+        setError("");
+
+        try {
+            await axios.delete<Automation>(
+                "/api/automations", 
+                {
+                    params: { id }
+                }
+            )
+
+            setAutomations((prev) => 
+                prev.filter((a) => a.id !== id)
+            );
+
+        } catch (err: unknown) {
+            setError(
+                getErrorMessage(err, "Failed to delete automation")
+            );
+        }
+
+    }
+
 
   return (
     <div>
