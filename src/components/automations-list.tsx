@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react";
+import { useState, type SubmitEvent} from "react";
 import axios from "axios";
 
 type Automation = {
@@ -36,6 +36,39 @@ export default function AutomationsList({
     const [name, setName] = useState<string>("");
     const [trigger, setTrigger] = useState<string>("");
     const [dmMessage, setDmMessage] = useState<string>("");
+
+    // CREATE - POST
+    async function handleCreate(e: SubmitEvent<HTMLFormElement>) {
+        e.preventDefault();
+        setLoading(true);
+        setError("");
+
+        try {
+            const { data } = await axios.post<Automation>(
+                "/api/automations",
+                {
+                    name,
+                    platform: "twitter",
+                    trigger,
+                    dmMessage,
+                }
+            );
+
+            setAutomations((prev) => [data, ...prev]);
+
+            setName("");
+            setTrigger("");
+            setDmMessage("");
+            setShowForm(false);
+
+        } catch (err: unknown) {
+            setError(
+                getErrorMessage(err, "Failed to create automation")
+            );
+        } finally {
+            setLoading(false);
+        }
+    }
 
 
   return (
@@ -107,7 +140,7 @@ export default function AutomationsList({
                         <div className="flex items-center gap-3">
                             {/* Toggle */}
                             <button 
-                                onClick={}
+                                // onClick={}
                                 className="">
                                 Toggle
                                 
@@ -115,7 +148,7 @@ export default function AutomationsList({
 
                             {/* Delete */}
                             <button
-                                onClick={} 
+                                // onClick={} 
                                 className="">
                                 Delete
 
