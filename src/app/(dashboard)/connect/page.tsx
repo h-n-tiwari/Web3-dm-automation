@@ -2,6 +2,7 @@ import { auth } from "@/server/auth";
 import { prisma } from "@/server/prisma";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import ConnectAccounts from "@/components/connect-accounts";
 
 export default async function ConnectPage() {
     const session = await auth.api.getSession({
@@ -23,6 +24,8 @@ export default async function ConnectPage() {
             <p className="mb-8 text-gray-400">
                 Link your social accounts to enable automations.
             </p>
+
+            <ConnectAccounts isTwitterConnected={!!twitterAccount} />
 
 
         </div>
