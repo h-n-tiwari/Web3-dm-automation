@@ -41,3 +41,14 @@ export const POST = withAuth(
 
     }
 );
+
+export const GET = withAuth(
+    async (_req, session): Promise<Response> => {
+        const subscription = await prisma.subscription.findUnique({
+            where: { userId: session.user.id },
+        });
+
+        return NextResponse.json(subscription ?? { plan: "free" });
+    }
+
+)
