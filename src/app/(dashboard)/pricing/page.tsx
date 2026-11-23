@@ -2,6 +2,8 @@ import { auth } from "@/server/auth";
 import { getUserPlan } from "@/server/subscription";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import PricingCards from "@/components/pricing-cards";
+
 
 export default async function PricingPage() {
     const session = await auth.api.getSession({
@@ -20,6 +22,8 @@ export default async function PricingPage() {
             <p className="mb-8 text-gray-400">You are currently on the{" "}
                 <span className="font-semibold text-white capitalize">{plan}</span> plan.
             </p>
+
+            <PricingCards currentPlan={plan} />
 
         </div>
     )
