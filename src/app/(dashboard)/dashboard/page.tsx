@@ -1,8 +1,5 @@
-import { auth } from "@/server/auth";
 import { prisma } from "@/server/prisma";
 import { getUserPlan } from "@/server/subscription";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import { requireWalletPage } from "@/server/utils/page-auth";
 
 
