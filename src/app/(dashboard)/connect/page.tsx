@@ -1,15 +1,9 @@
-import { prisma } from "@/server/prisma";
+import { Suspense } from "react";
 import ConnectAccounts from "@/components/connect-accounts";
+import { prisma } from "@/server/prisma";
 import { requireWalletPage } from "@/server/utils/page-auth";
 
-export default async function ConnectPage() {
-
-  const session = await requireWalletPage();
-
-  const twitterAccount = await prisma.account.findFirst({
-    where: { userId: session.user.id, providerId: "twitter" },
-  });
-
+export default function ConnectPage() {
   return (
     <div>
       <h1 className="mb-2 text-2xl font-bold">Connect Accounts</h1>
@@ -17,7 +11,18 @@ export default async function ConnectPage() {
         Link your social accounts to enable automations.
       </p>
 
-      <ConnectAccounts isTwitterConnected={!!twitterAccount} />
+      <Suspense fallback={<p role="status">Checking connected accounts…</p>}>
+        <ConnectedAccountsPanel />
+      </Suspense>
     </div>
   );
+}
+
+async function ConnectedAccountsPanel() {
+  const session = await requireWalletPage();
+  const twitterAccount = await prisma.account.findFirst({
+    where: { userId: session.user.id, providerId: "twitter" },
+  });
+
+  return <ConnectAccounts isTwitterConnected={!!twitterAccount} />;
 }
