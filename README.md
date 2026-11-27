@@ -34,3 +34,60 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+
+
+
+
+
+
+{"plan":"pro","expiresAt":"2026-12-26T10:57:48.000Z"}
+
+0xbc7cac3bf686d1521cf647b32acb60e3de0266b0aa592a936a6f08d21a6967bf
+
+{"plan":"pro","expiresAt":"2027-04-25T10:57:48.000Z"}
+
+
+# Error 
+
+## Twitter/X OAuth Errors and Fixes
+
+### 1. CSP Warning
+**Error:** JavaScript source map blocked.
+
+**Fix:** Ignore it. This is from X's website, not your app.
+
+### 2. ERR_BLOCKED_BY_CLIENT
+**Error:** Sentry request blocked.
+
+**Fix:** Usually caused by an ad blocker. Safe to ignore.
+
+### 3. 400 Bad Request
+**Error:** `onboarding/referrer.json`
+
+**Fix:** This is an X internal request. Check the actual OAuth callback to see whether linking failed.
+
+### 4. Twitter OAuth Redirect Error
+**Cause:** Callback URL may be incorrect.
+
+**Fix:** Add these URLs in the X Developer Portal.
+
+**Local:**
+```text
+http://localhost:3000/api/auth/callback/twitter
+```
+
+**Production:**
+```text
+https://web3-dm-automation.vercel.app/api/auth/callback/twitter
+```
+
+### 5. Check If Twitter Connected
+
+1. Click **Connect Twitter**.
+2. Click **Authorize app**.
+3. Check whether you're redirected to `/connect`.
+4. If the page shows **Connected**, and the account is saved in PostgreSQL, linking worked.
+
+**Note:** The first three errors don't necessarily mean Twitter OAuth failed.
