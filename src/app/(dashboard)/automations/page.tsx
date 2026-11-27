@@ -1,18 +1,11 @@
 import AutomationsList from "@/components/automations-list";
-import { auth } from "@/server/auth";
 import { prisma } from "@/server/prisma";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
+import { requireWalletPage } from "@/server/utils/page-auth";
 
 
 export default async function AutomationPage() {
-    const session = await auth.api.getSession({
-        headers: await headers(),
-    });
 
-    if (!session) {
-        redirect("/login");
-    }
+    const session = await requireWalletPage();
 
     const automations = await prisma.automation.findMany({
         where: { userId: session.user.id },
