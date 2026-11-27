@@ -1,9 +1,23 @@
 import { prisma } from "@/server/prisma";
 import { getUserPlan } from "@/server/subscription";
 import { requireWalletPage } from "@/server/utils/page-auth";
-
+import { Suspense } from "react";
+import DashboardLoading from "./loading";
 
 export default async function DashboardPage() {
+  return (
+    <div>
+      <h1 className="mb-8 text-2xl font-bold">Dashboard</h1>
+
+      {/* Stats */}
+      <Suspense fallback={<DashboardLoading />}>
+        <DashboardContent />
+      </Suspense>
+    </div>
+  );
+}
+
+async function DashboardContent() {
   // Get Session - redirect to login if not authenticated
 
   const session = await requireWalletPage();
@@ -20,10 +34,7 @@ export default async function DashboardPage() {
     ]);
 
   return (
-    <div>
-      <h1 className="mb-8 text-2xl font-bold">Dashboard</h1>
-
-      {/* Stats */}
+    <>
       <div className="mb-8 grid grid-cols-3 gap-4">
         <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
           <p className="text-sm text-gray-400">Total Automations</p>
@@ -60,7 +71,7 @@ export default async function DashboardPage() {
 
           {twitterAccount ? (
             <span className="rounded-full bg-green-500/10 px-3 py-1 text-sm text-green-400">
-              ✓ Active
+              Active
             </span>
           ) : (
             <a
@@ -88,7 +99,6 @@ export default async function DashboardPage() {
           Upgrade Plan
         </a>
       </div>
-    </div>
+    </>
   );
 }
-
