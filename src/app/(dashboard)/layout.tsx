@@ -1,11 +1,7 @@
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import Link from "next/link";
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen bg-gray-950 text-white">
       {/* Sidebar */}
@@ -39,7 +35,10 @@ export default function DashboardLayout({
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 p-8">{children}</main>
+      {/* <main className="flex-1 p-8">{children}</main> */}
+      <main className="flex-1 p-8">
+        <Suspense fallback={null}>{children}</Suspense>
+      </main>
     </div>
   );
 }
