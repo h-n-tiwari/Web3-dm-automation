@@ -10,63 +10,87 @@ type CreateAutomationBody = Pick<
   "name" | "platform" | "trigger" | "dmMessage"
 >;
 
+function serverError(method: string, error: unknown): Response {
+  console.error(`[automations] ${method} failed`, error);
+  return NextResponse.json(
+    { error: "Internal server error" },
+    { status: 500 }
+  );
+}
+
 export const GET = withWalletAuth(
   async (_req, session): Promise<Response> => {
-    const automations = await prisma.automation.findMany({
-      where: { userId: session.user.id },
-      orderBy: { createdAt: "desc" },
-    });
+    try {
+      const automations = await prisma.automation.findMany({
+        where: { userId: session.user.id },
+        orderBy: { createdAt: "desc" },
+      });
 
-    return NextResponse.json(automations);
+      return NextResponse.json(automations);
+    } catch (error) {
+      return serverError("GET", error);
+    }
   }
 );
 
 export const POST = withWalletAuth(
   async (req, session): Promise<Response> => {
+    try {
+      const userId = session.user.id;
+      const plan = await getUserPlan(userId);
 
-    const plan = await getUserPlan(session.user.id);
+      if (plan === "free") {
+        const count = await prisma.automation.count({ where: { userId } });
 
-    if (plan === "free") {
-      const count = await prisma.automation.count({ where: { userId: session.user.id } });
-
-      if (count >= FREE_AUTOMATION_LIMIT) {
-        return NextResponse.json({ error: `Free plan allows a maximum of ${FREE_AUTOMATION_LIMIT} automations.` }, { status: 403 });
+        if (count >= FREE_AUTOMATION_LIMIT) {
+          return NextResponse.json(
+            {
+              error: `Free plan allows a maximum of ${FREE_AUTOMATION_LIMIT} automations.`,
+            },
+            { status: 403 }
+          );
+        }
       }
-      
+
+      let body: Partial<CreateAutomationBody> | null;
+      try {
+        body = await req.json();
+      } catch (error) {
+        if (!(error instanceof SyntaxError)) throw error;
+
+        return NextResponse.json(
+          { error: "Invalid JSON body" },
+          { status: 400 }
+        );
+      }
+
+      const { name, platform, trigger, dmMessage } = body ?? {};
+
+      if (!name || !platform || !trigger || !dmMessage) {
+        return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+      }
+
+      const account = await prisma.account.findFirst({
+        where: { userId, providerId: "twitter" },
+      });
+
+      if (!account?.accessToken) {
+        return NextResponse.json(
+          { error: "Twitter account not connected" },
+          { status: 400 }
+        );
+      }
+
+      const automation = await prisma.automation.create({
+        data: { userId, name, platform, trigger, dmMessage },
+      });
+
+      return NextResponse.json(automation, { status: 201 });
+    } catch (error) {
+      return serverError("POST", error);
     }
-
-    const body: Partial<CreateAutomationBody> = await req.json();
-    const { name, platform, trigger, dmMessage } = body;
-
-    if (!name || !platform || !trigger || !dmMessage) {
-      return NextResponse.json(
-        { error: "Missing fields" },
-        { status: 400 }
-      );
-    }
-
-  const account = await prisma.account.findFirst({
-    where: { userId: session.user.id, providerId: "twitter" },
-  });
-
-  if (!account?.accessToken) {
-    return NextResponse.json({ error: "Twitter account not connected" }, { status: 400 });
-  }
-
-    const automation = await prisma.automation.create({
-      data: {
-        userId: session.user.id,
-        name,
-        platform,
-        trigger,
-        dmMessage,
-      },
-    });
-
-    return NextResponse.json(automation, { status: 201 });
   }
 );
-
 export const DELETE = withWalletAuth(
   async (req, session): Promise<Response> => {
     try {
