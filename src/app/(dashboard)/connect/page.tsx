@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import ConnectAccounts from "@/components/connect-accounts";
 import { prisma } from "@/server/prisma";
-import { requireWalletPage } from "@/server/utils/page-auth";
+import { requirePageSession } from "@/server/utils/page-auth";
 
 export default function ConnectPage() {
   return (
@@ -19,7 +19,7 @@ export default function ConnectPage() {
 }
 
 async function ConnectedAccountsPanel() {
-  const session = await requireWalletPage();
+  const session = await requirePageSession();
   const twitterAccount = await prisma.account.findFirst({
     where: { userId: session.user.id, providerId: "twitter" },
   });
