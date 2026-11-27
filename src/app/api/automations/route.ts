@@ -1,15 +1,16 @@
-import { withAuth } from "@/server/utils/with-auth";
+import { withWalletAuth } from "@/server/utils/with-auth";
 import { prisma } from "@/server/prisma";
 import type { Prisma } from "@/generated/prisma/client";
 import { NextResponse } from "next/server";
 import { getUserPlan, FREE_AUTOMATION_LIMIT } from "@/server/subscription";
+import { getOwnedAutomation } from "@/server/utils/get-owned-automations";
 
 type CreateAutomationBody = Pick<
   Prisma.AutomationCreateInput,
   "name" | "platform" | "trigger" | "dmMessage"
 >;
 
-export const GET = withAuth(
+export const GET = withWalletAuth(
   async (_req, session): Promise<Response> => {
     const automations = await prisma.automation.findMany({
       where: { userId: session.user.id },
@@ -20,28 +21,8 @@ export const GET = withAuth(
   }
 );
 
-export const POST = withAuth(
+export const POST = withWalletAuth(
   async (req, session): Promise<Response> => {
-    // const subscription = await prisma.subscription.findUnique({
-    //   where: { userId: session.user.id },
-    // });
-
-    // const isPro =
-    //   subscription?.plan === "pro" &&
-    //   (!subscription.expiresAt || subscription.expiresAt > new Date());
-
-    // if (!isPro) {
-    //   const count = await prisma.automation.count({
-    //     where: { userId: session.user.id },
-    //   });
-
-    //   if (count >= 5) {
-    //     return NextResponse.json(
-    //       { error: "Free tier limit: 5 automations max. Upgrade to pro." },
-    //       { status: 403 }
-    //     );
-    //   }
-    // }
 
     const plan = await getUserPlan(session.user.id);
 
@@ -49,7 +30,7 @@ export const POST = withAuth(
       const count = await prisma.automation.count({ where: { userId: session.user.id } });
 
       if (count >= FREE_AUTOMATION_LIMIT) {
-        return NextResponse.json({ error: "..." }, { status: 403 });
+        return NextResponse.json({ error: `Free plan allows a maximum of ${FREE_AUTOMATION_LIMIT} automations.` }, { status: 403 });
       }
       
     }
@@ -86,58 +67,62 @@ export const POST = withAuth(
   }
 );
 
-export const DELETE = withAuth(
+export const DELETE = withWalletAuth(
   async (req, session): Promise<Response> => {
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
+    try {
+      const result = await getOwnedAutomation(
+        req,
+        session.user.id
+      );
 
-    if (!id) {
+      if (!result.success) {
+        return result.response;
+      }
+
+      await prisma.automation.delete({
+        where: { id: result.automation.id },
+      });
+
+      return NextResponse.json({ success: true });
+    } catch (error) {
+      console.error("DELETE automation error:", error);
+
       return NextResponse.json(
-        { error: "Missing id" },
-        { status: 400 }
+        { error: "Failed to delete automation" },
+        { status: 500 }
       );
     }
-
-    const automation = await prisma.automation.findUnique({
-      where: { id },
-    });
-
-    if (!automation || automation.userId !== session.user.id) {
-      return NextResponse.json(
-        { error: "Not Found" },
-        { status: 404 }
-      );
-    }
-
-    await prisma.automation.delete({
-      where: { id },
-    });
-
-    return NextResponse.json({ success: true });
   }
 );
 
-export const PATCH = withAuth(
+
+export const PATCH = withWalletAuth(
   async (req, session): Promise<Response> => {
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
+    try {
+      const result = await getOwnedAutomation(
+        req,
+        session.user.id
+      );
 
-    if (!id) {
-      return NextResponse.json({ error: "Missing id" }, { status: 400 });
+      if (!result.success) {
+        return result.response;
+      }
+
+      const updated = await prisma.automation.update({
+        where: { id: result.automation.id },
+        data: {
+          isActive: !result.automation.isActive,
+        },
+      });
+
+      return NextResponse.json(updated);
+    } catch (error) {
+      console.error("PATCH automation error:", error);
+
+      return NextResponse.json(
+        { error: "Failed to update automation" },
+        { status: 500 }
+      );
     }
-
-    const automation = await prisma.automation.findUnique({ where: { id } });
-
-    if (!automation || automation.userId !== session.user.id) {
-      return NextResponse.json({ error: "Not Found" }, { status: 404 });
-    } 
-
-    const updated = await prisma.automation.update({
-      where: { id },
-      data: { isActive: !automation.isActive },
-    });
-
-    return NextResponse.json(updated);
-
   }
 );
