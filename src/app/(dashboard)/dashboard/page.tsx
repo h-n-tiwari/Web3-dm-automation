@@ -3,16 +3,13 @@ import { prisma } from "@/server/prisma";
 import { getUserPlan } from "@/server/subscription";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { requireWalletPage } from "@/server/utils/page-auth";
+
 
 export default async function DashboardPage() {
   // Get Session - redirect to login if not authenticated
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
 
-  if (!session) {
-    redirect("/login");
-  }
+  const session = await requireWalletPage();
 
   const userId = session.user.id;
 
@@ -97,3 +94,4 @@ export default async function DashboardPage() {
     </div>
   );
 }
+
